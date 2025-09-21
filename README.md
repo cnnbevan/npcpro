@@ -26,8 +26,28 @@ db/         MySQL 建表脚本与字段注释
 3. 独立启动前端或后端：`npm run client:dev` / `npm run server:dev`
 4. 代码质量检查：`npm run lint`
 5. 生产构建与预览：`npm run build`，随后 `npm run preview`
+6. 局域网共享开发环境：`npm run dev:host`（前端监听 `0.0.0.0:5173`，便于其他设备访问）
+7. 访问管理后台：启动后在浏览器打开 `/admin`，可维护影片、剧情、对白与角色数据。
 
 > 开发时请确保已准备好 `.env` 并配置数据库、AI Agent 等凭证（如需）。
+
+### 环境变量
+
+后端默认读取以下 MySQL 连接配置，可在仓库根目录创建 `.env` 覆盖：
+
+```
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=npcdb
+DB_CONNECTION_LIMIT=10
+
+### 数据库结构更新
+
+- `db/mysql_schema.sql` 与 `db/mysql_schema_comments.sql` 已补充 `movie_scripts`、`movie_dialogue_files` 两张新表，用于存储完整剧本与对白文本。
+- 若需在现有数据库应用变更，可执行 `db/alter_202501_add_scripts_dialogues.sql` 中的建表语句。
+```
 
 ## 当前状态
 - 前端结构已搭建，`Home` 页面和交互仍待实现。

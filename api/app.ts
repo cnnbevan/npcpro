@@ -4,14 +4,17 @@
 
 import express, { type Request, type Response, type NextFunction }  from 'express';
 import cors from 'cors';
-import path from 'path';
 import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.js';
-
-// for esm mode
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import moviesRoutes from './routes/movies.js';
+import charactersRoutes from './routes/characters.js';
+import scenesRoutes from './routes/scenes.js';
+import subtitleSegmentsRoutes from './routes/subtitleSegments.js';
+import referencesRoutes from './routes/references.js';
+import characterNotesRoutes from './routes/characterNotes.js';
+import narrativeRoutes from './routes/narrative.js';
+import movieScriptsRoutes from './routes/movieScripts.js';
+import movieDialoguesRoutes from './routes/movieDialogues.js';
 
 // load env
 dotenv.config();
@@ -27,11 +30,20 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
  * API Routes
  */
 app.use('/api/auth', authRoutes);
+app.use('/api/movies', moviesRoutes);
+app.use('/api', charactersRoutes);
+app.use('/api', scenesRoutes);
+app.use('/api', subtitleSegmentsRoutes);
+app.use('/api', referencesRoutes);
+app.use('/api', characterNotesRoutes);
+app.use('/api', movieScriptsRoutes);
+app.use('/api', movieDialoguesRoutes);
+app.use('/api', narrativeRoutes);
 
 /**
  * health
  */
-app.use('/api/health', (req: Request, res: Response, next: NextFunction): void => {
+app.use('/api/health', (_req: Request, res: Response): void => {
   res.status(200).json({
     success: true,
     message: 'ok'
@@ -41,7 +53,9 @@ app.use('/api/health', (req: Request, res: Response, next: NextFunction): void =
 /**
  * error handler middleware
  */
-app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
+  void _next;
+  console.error('Unhandled API error:', error);
   res.status(500).json({
     success: false,
     error: 'Server internal error'
