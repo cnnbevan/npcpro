@@ -1,0 +1,133 @@
+-- Apply comments to existing tables in npcdb
+
+ALTER TABLE movies COMMENT = '电影信息表';
+ALTER TABLE movies
+    MODIFY COLUMN id CHAR(36) NOT NULL DEFAULT (UUID()) COMMENT '电影ID',
+    MODIFY COLUMN title TEXT NOT NULL COMMENT '影片标题',
+    MODIFY COLUMN original_title TEXT NULL COMMENT '原始片名',
+    MODIFY COLUMN release_year SMALLINT NULL COMMENT '上映年份',
+    MODIFY COLUMN language TEXT NULL COMMENT '影片语言',
+    MODIFY COLUMN runtime_minutes SMALLINT NULL COMMENT '片长（分钟）',
+    MODIFY COLUMN genres JSON NOT NULL DEFAULT (JSON_ARRAY()) COMMENT '影片类型列表',
+    MODIFY COLUMN poster_url TEXT NULL COMMENT '海报链接',
+    MODIFY COLUMN synopsis TEXT NULL COMMENT '剧情简介',
+    MODIFY COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    MODIFY COLUMN updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间';
+
+ALTER TABLE characters COMMENT = '角色信息表';
+ALTER TABLE characters
+    MODIFY COLUMN id CHAR(36) NOT NULL DEFAULT (UUID()) COMMENT '角色ID',
+    MODIFY COLUMN movie_id CHAR(36) NOT NULL COMMENT '所属电影ID',
+    MODIFY COLUMN name TEXT NOT NULL COMMENT '角色名称',
+    MODIFY COLUMN aliases JSON NOT NULL DEFAULT (JSON_ARRAY()) COMMENT '角色别名列表',
+    MODIFY COLUMN actor_name TEXT NULL COMMENT '扮演演员',
+    MODIFY COLUMN description TEXT NULL COMMENT '角色描述',
+    MODIFY COLUMN traits JSON NOT NULL DEFAULT (JSON_OBJECT()) COMMENT '角色特质',
+    MODIFY COLUMN is_primary BOOLEAN NOT NULL DEFAULT FALSE COMMENT '是否主要角色',
+    MODIFY COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    MODIFY COLUMN updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    MODIFY COLUMN created_by TEXT NULL COMMENT '创建人',
+    MODIFY COLUMN updated_by TEXT NULL COMMENT '更新人';
+
+ALTER TABLE scenes COMMENT = '场景信息表';
+ALTER TABLE scenes
+    MODIFY COLUMN id CHAR(36) NOT NULL DEFAULT (UUID()) COMMENT '场景ID',
+    MODIFY COLUMN movie_id CHAR(36) NOT NULL COMMENT '所属电影ID',
+    MODIFY COLUMN scene_number INT NOT NULL COMMENT '场景编号',
+    MODIFY COLUMN start_ms INT NULL COMMENT '开始时间（毫秒）',
+    MODIFY COLUMN end_ms INT NULL COMMENT '结束时间（毫秒）',
+    MODIFY COLUMN summary TEXT NULL COMMENT '场景摘要',
+    MODIFY COLUMN location TEXT NULL COMMENT '场景地点',
+    MODIFY COLUMN chapter TEXT NULL COMMENT '所属章',
+    MODIFY COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    MODIFY COLUMN updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间';
+
+ALTER TABLE subtitle_segments COMMENT = '字幕片段表';
+ALTER TABLE subtitle_segments
+    MODIFY COLUMN id CHAR(36) NOT NULL DEFAULT (UUID()) COMMENT '字幕片段ID',
+    MODIFY COLUMN movie_id CHAR(36) NOT NULL COMMENT '所属电影ID',
+    MODIFY COLUMN scene_id CHAR(36) NULL COMMENT '关联场景ID',
+    MODIFY COLUMN character_id CHAR(36) NULL COMMENT '关联角色ID',
+    MODIFY COLUMN start_ms INT NOT NULL COMMENT '开始时间（毫秒）',
+    MODIFY COLUMN end_ms INT NOT NULL COMMENT '结束时间（毫秒）',
+    MODIFY COLUMN speaker TEXT NULL COMMENT '说话者',
+    MODIFY COLUMN text TEXT NOT NULL COMMENT '字幕文本',
+    MODIFY COLUMN confidence FLOAT NULL COMMENT '识别置信度',
+    MODIFY COLUMN source TEXT NULL COMMENT '数据来源',
+    MODIFY COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间';
+
+ALTER TABLE movie_references COMMENT = '电影参考资料表';
+ALTER TABLE movie_references
+    MODIFY COLUMN id CHAR(36) NOT NULL DEFAULT (UUID()) COMMENT '参考资料ID',
+    MODIFY COLUMN movie_id CHAR(36) NOT NULL COMMENT '所属电影ID',
+    MODIFY COLUMN type ENUM('plot_point','background','trivia','marketing') NOT NULL COMMENT '参考类型',
+    MODIFY COLUMN title TEXT NULL COMMENT '参考标题',
+    MODIFY COLUMN content TEXT NOT NULL COMMENT '参考内容',
+    MODIFY COLUMN source_url TEXT NULL COMMENT '来源链接',
+    MODIFY COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    MODIFY COLUMN created_by TEXT NULL COMMENT '创建人';
+
+ALTER TABLE character_notes COMMENT = '角色笔记表';
+ALTER TABLE character_notes
+    MODIFY COLUMN id CHAR(36) NOT NULL DEFAULT (UUID()) COMMENT '笔记ID',
+    MODIFY COLUMN character_id CHAR(36) NOT NULL COMMENT '角色ID',
+    MODIFY COLUMN note_type ENUM('persona','relationship','backstory','speech_pattern','other') NOT NULL COMMENT '笔记类型',
+    MODIFY COLUMN content TEXT NOT NULL COMMENT '笔记内容',
+    MODIFY COLUMN source TEXT NULL COMMENT '来源说明',
+    MODIFY COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    MODIFY COLUMN created_by TEXT NULL COMMENT '创建人';
+
+ALTER TABLE narrative_requests COMMENT = '叙事请求记录表';
+ALTER TABLE narrative_requests
+    MODIFY COLUMN id CHAR(36) NOT NULL DEFAULT (UUID()) COMMENT '请求ID',
+    MODIFY COLUMN user_id CHAR(36) NULL COMMENT '用户ID',
+    MODIFY COLUMN movie_id CHAR(36) NULL COMMENT '关联电影ID',
+    MODIFY COLUMN character_id CHAR(36) NULL COMMENT '关联角色ID',
+    MODIFY COLUMN request_payload JSON NOT NULL COMMENT '请求参数JSON',
+    MODIFY COLUMN status ENUM('queued','running','succeeded','failed','cancelled') NOT NULL DEFAULT 'queued' COMMENT '请求状态',
+    MODIFY COLUMN started_at TIMESTAMP NULL COMMENT '开始时间',
+    MODIFY COLUMN completed_at TIMESTAMP NULL COMMENT '完成时间',
+    MODIFY COLUMN result_token_usage INT NULL COMMENT '令牌用量',
+    MODIFY COLUMN cache_hit BOOLEAN NOT NULL DEFAULT FALSE COMMENT '是否命中缓存',
+    MODIFY COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间';
+
+ALTER TABLE narrative_outputs COMMENT = '叙事结果表';
+ALTER TABLE narrative_outputs
+    MODIFY COLUMN id CHAR(36) NOT NULL DEFAULT (UUID()) COMMENT '结果ID',
+    MODIFY COLUMN request_id CHAR(36) NOT NULL COMMENT '关联请求ID',
+    MODIFY COLUMN model_name TEXT NOT NULL COMMENT '模型名称',
+    MODIFY COLUMN prompt_version TEXT NULL COMMENT '提示词版本',
+    MODIFY COLUMN story_markdown TEXT NOT NULL COMMENT '故事内容Markdown',
+    MODIFY COLUMN timeline_json JSON NULL COMMENT '时间线JSON',
+    MODIFY COLUMN quality_score SMALLINT NULL COMMENT '质量评分',
+    MODIFY COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间';
+
+ALTER TABLE prompt_chunks COMMENT = '提示块缓存表';
+ALTER TABLE prompt_chunks
+    MODIFY COLUMN id CHAR(36) NOT NULL DEFAULT (UUID()) COMMENT '提示块ID',
+    MODIFY COLUMN movie_id CHAR(36) NOT NULL COMMENT '关联电影ID',
+    MODIFY COLUMN chunk_type ENUM('synopsis','scene','dialogue','character_note') NOT NULL COMMENT '提示块类型',
+    MODIFY COLUMN chunk_order INT NULL COMMENT '提示块顺序',
+    MODIFY COLUMN content TEXT NOT NULL COMMENT '提示块内容',
+    MODIFY COLUMN source_ids JSON NOT NULL DEFAULT (JSON_ARRAY()) COMMENT '来源ID列表',
+    MODIFY COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    MODIFY COLUMN updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间';
+
+ALTER TABLE subtitle_embeddings COMMENT = '字幕嵌入向量表';
+ALTER TABLE subtitle_embeddings
+    MODIFY COLUMN segment_id CHAR(36) NOT NULL COMMENT '字幕片段ID',
+    MODIFY COLUMN movie_id CHAR(36) NOT NULL COMMENT '电影ID',
+    MODIFY COLUMN embedding BLOB NULL COMMENT '嵌入向量数据',
+    MODIFY COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间';
+
+CREATE OR REPLACE VIEW character_dialogue_view AS
+SELECT
+    ss.id          AS segment_id,
+    ss.movie_id,
+    ss.character_id,
+    c.name         AS character_name,
+    ss.start_ms,
+    ss.end_ms,
+    ss.text
+FROM subtitle_segments ss
+LEFT JOIN characters c ON c.id = ss.character_id;
