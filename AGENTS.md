@@ -1,5 +1,7 @@
 # Repository Guidelines
 
+用中文进行交互。
+
 ## Project Structure & Module Organization
 - `src/` contains the React client; pages live in `src/pages`, reusable UI in `src/components`, and state in `src/hooks` or `src/lib`.
 - `api/` holds the Express gateway (`api/server.ts`) and route handlers (`api/routes/*`). Keep shared client/server types in `src/lib` to avoid drift.
