@@ -1,57 +1,42 @@
-# React + TypeScript + Vite
+# NPCPro
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 项目简介
+NPCPro 是一个围绕影视作品角色叙事生成的全栈项目。用户提供电影名称与角色名称后，系统从预先整理的剧情数据中检索信息，调用 AI Agent 生成角色视角的一人称叙事，并在前端页面展示。
 
-Currently, two official plugins are available:
+## 系统架构
+- 前端（React + Vite + TypeScript）：提供检索表单、状态提示与生成结果的展示区域，后续扩展收藏、导出等功能。
+- 后端（Node.js / Express）：负责接收请求、检索数据库、构建 Prompt，并与 AI Agent 服务交互，返回整理后的文本。
+- AI Agent 服务：根据后端构建的上下文生成角色视角叙事，可根据需要替换为不同模型或多阶段流程。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 数据与存储
+项目内的 `db/mysql_schema.sql` 与 `db/mysql_schema_comments.sql` 定义了完整数据模型，涵盖电影信息、角色、场景、字幕片段、叙事请求与生成结果等表，并提供角色台词视图。数据库以电影 ID 为核心，支持按场景与角色维度检索，为后端构建 Prompt 提供素材。
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## 仓库结构
+```
+api/        Express 服务入口与路由，占位的鉴权接口示例
+src/        React 前端源码，包含页面、组件、hooks 与通用工具
+public/     静态资源目录
+db/         MySQL 建表脚本与字段注释
+*.config    Vite、Tailwind、ESLint 等配置文件位于仓库根目录
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 开发与调试
+1. 安装依赖：`npm install`
+2. 启动前端与后端（默认 5173 + 3001）：`npm run dev`
+3. 独立启动前端或后端：`npm run client:dev` / `npm run server:dev`
+4. 代码质量检查：`npm run lint`
+5. 生产构建与预览：`npm run build`，随后 `npm run preview`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+> 开发时请确保已准备好 `.env` 并配置数据库、AI Agent 等凭证（如需）。
 
-export default tseslint.config({
-  extends: [
-    // other configs...
-    // Enable lint rules for React
-    reactX.configs['recommended-typescript'],
-    // Enable lint rules for React DOM
-    reactDom.configs.recommended,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## 当前状态
+- 前端结构已搭建，`Home` 页面和交互仍待实现。
+- 后端鉴权路由为占位示例，尚未接入数据库与 Agent 调用。
+- 数据库脚本已提供，可用于初始化 `npcdb` 并验证数据检索流程。
+
+## 近期里程碑
+1. 导入首部电影数据并完成基础检索接口。
+2. 完成后端叙事生成 API，与 AI Agent 打通。
+3. 构建前端用户流程：输入 → 等待状态 → 结果展示。
+4. 联调端到端流程，交付可演示版本。
+5. 根据反馈扩展多影片、多角色、结果导出等能力。
