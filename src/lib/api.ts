@@ -189,6 +189,13 @@ export async function createMovieScript(payload: MovieScriptPayload): Promise<Mo
   }, "上传剧本失败")
 }
 
+export async function updateMovieScript(id: string, payload: MovieScriptPayload): Promise<MovieScript> {
+  return requestJson<MovieScript>(`/api/movie-scripts/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  }, "更新剧本失败")
+}
+
 export async function deleteMovieScript(id: string): Promise<void> {
   await requestJson<{ id: string }>(`/api/movie-scripts/${id}`, {
     method: "DELETE",
@@ -204,6 +211,13 @@ export async function createMovieDialogue(payload: MovieDialoguePayload): Promis
     method: "POST",
     body: JSON.stringify(payload),
   }, "上传对白失败")
+}
+
+export async function updateMovieDialogue(id: string, payload: MovieDialoguePayload): Promise<MovieDialogueFile> {
+  return requestJson<MovieDialogueFile>(`/api/movie-dialogues/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  }, "更新对白失败")
 }
 
 export async function deleteMovieDialogue(id: string): Promise<void> {

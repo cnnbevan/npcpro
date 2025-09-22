@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react"
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react"
 import {
   BookMarked,
   Moon,
@@ -28,6 +28,8 @@ import {
   fetchMovieDialogues,
   fetchMovieScripts,
   fetchMovies,
+  updateMovieDialogue,
+  updateMovieScript,
   updateCharacter,
   updateMovie,
 } from "@/lib/api"
@@ -74,14 +76,14 @@ const cardContainerClass =
 const listCardClass =
   "rounded-xl border border-slate-200 bg-white/80 p-4 transition dark:border-slate-800 dark:bg-slate-900/60"
 const inputBaseClass =
-  "mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-400/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+  "mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-400/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-amber-500 dark:focus:ring-amber-400/40"
 const textareaBaseClass =
-  "mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm leading-6 text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-400/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+  "mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm leading-6 text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-400/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-amber-500 dark:focus:ring-amber-400/40"
 const fileInputClass =
-  "mt-1 block w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-amber-500/90 file:px-3 file:py-2 file:text-slate-900 hover:file:bg-amber-400 dark:text-slate-300"
+  "mt-1 block w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-white hover:file:bg-sky-500 dark:text-slate-300 dark:file:bg-amber-500 dark:file:text-slate-900 dark:hover:file:bg-amber-400"
 const labelClass = "text-sm font-medium text-slate-700 dark:text-slate-300"
 const selectBaseClass =
-  "mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-400/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+  "mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-400/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-amber-500 dark:focus:ring-amber-400/40"
 
 function formatDateTime(value?: string | null) {
   if (!value) return "-"
@@ -163,7 +165,7 @@ export default function Admin() {
       <div className="flex min-h-screen">
         <aside className="w-68 shrink-0 border-r border-slate-200 bg-white/90 backdrop-blur transition dark:border-slate-800 dark:bg-slate-950/60">
           <div className="px-6 py-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-amber-500/80 dark:text-amber-300/80">
+            <p className="text-xs font-semibold uppercase tracking-widest text-sky-600/80 dark:text-amber-200/80">
               NPCPro 管理后台
             </p>
             <h1 className="mt-2 text-2xl font-semibold">资料维护面板</h1>
@@ -178,7 +180,7 @@ export default function Admin() {
                   onClick={() => setActiveSection(item.key)}
                   className={`flex items-center gap-3 rounded-xl px-4 py-3 text-left transition ${
                     isActive
-                      ? "bg-amber-100 text-amber-700 shadow-sm dark:bg-amber-400/20 dark:text-amber-200"
+                      ? "bg-sky-100 text-sky-700 shadow-sm dark:bg-sky-500/20 dark:text-amber-200"
                       : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/70"
                   }`}
                 >
@@ -186,7 +188,9 @@ export default function Admin() {
                     {item.icon}
                   </span>
                   <span>
-                    <span className="block text-sm font-medium">{item.label}</span>
+                    <span className="block text-sm font-medium text-slate-900 dark:text-amber-200">
+                      {item.label}
+                    </span>
                     <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
                       {item.description}
                     </span>
@@ -312,7 +316,7 @@ function MovieManager({ movies, setMovies, loading, setGlobalError }: MovieManag
   return (
     <section className="space-y-8">
       <header>
-        <h2 className="flex items-center gap-2 text-2xl font-semibold text-amber-200">
+        <h2 className="flex items-center gap-2 text-2xl font-semibold text-sky-600 dark:text-amber-200">
           <Film className="h-6 w-6" />
           影片管理
         </h2>
@@ -393,7 +397,7 @@ function MovieManager({ movies, setMovies, loading, setGlobalError }: MovieManag
                   type="url"
                   value={formState.posterUrl ?? ""}
                   onChange={(event) => setFormState((prev) => ({ ...prev, posterUrl: event.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400/50"
+                  className={inputBaseClass}
                 />
               </label>
               <label className={`${labelClass} md:col-span-2`}>
@@ -410,7 +414,7 @@ function MovieManager({ movies, setMovies, loading, setGlobalError }: MovieManag
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-amber-500/60"
+                className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:bg-sky-300 disabled:text-white/70 dark:bg-amber-500 dark:text-slate-900 dark:hover:bg-amber-400 dark:disabled:bg-amber-500/60 dark:disabled:text-slate-900/60"
               >
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookMarked className="h-4 w-4" />}
                 {editingId ? "保存修改" : "创建影片"}
@@ -464,7 +468,7 @@ function MovieManager({ movies, setMovies, loading, setGlobalError }: MovieManag
                       <div className="flex gap-2">
                         <button
                           type="button"
-                          className="rounded-lg border border-slate-700 px-3 py-1 text-xs text-slate-200 hover:border-amber-400 hover:text-amber-200"
+                          className="rounded-lg border border-slate-300 px-3 py-1 text-xs text-slate-900 transition hover:border-sky-400 hover:text-sky-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-amber-400 dark:hover:text-amber-200"
                           onClick={() => {
                             setEditingId(movie.id)
                             setFormState({
@@ -523,13 +527,23 @@ function ScriptManager({ movies, setGlobalError }: ScriptManagerProps) {
   const [selectedMovieId, setSelectedMovieId] = useState<string>("")
   const [scripts, setScripts] = useState<MovieScript[]>([])
   const [loading, setLoading] = useState(false)
-  const [uploading, setUploading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [editingScriptId, setEditingScriptId] = useState<string | null>(null)
   const [scriptTitle, setScriptTitle] = useState("")
   const [plotText, setPlotText] = useState("")
   const [screenplayText, setScreenplayText] = useState("")
   const [createdBy, setCreatedBy] = useState("")
 
+  const resetForm = useCallback(() => {
+    setScriptTitle("")
+    setPlotText("")
+    setScreenplayText("")
+    setCreatedBy("")
+    setEditingScriptId(null)
+  }, [setScriptTitle, setPlotText, setScreenplayText, setCreatedBy, setEditingScriptId])
+
   useEffect(() => {
+    resetForm()
     if (!selectedMovieId) {
       setScripts([])
       return
@@ -547,7 +561,7 @@ function ScriptManager({ movies, setGlobalError }: ScriptManagerProps) {
       }
     }
     void loadScripts()
-  }, [selectedMovieId, setGlobalError])
+  }, [selectedMovieId, setGlobalError, resetForm])
 
   const handleFileRead = async (file: File, setter: (value: string) => void) => {
     const text = await file.text()
@@ -565,7 +579,7 @@ function ScriptManager({ movies, setGlobalError }: ScriptManagerProps) {
       return
     }
 
-    setUploading(true)
+    setSaving(true)
     setGlobalError(undefined)
     try {
       const payload = {
@@ -575,16 +589,18 @@ function ScriptManager({ movies, setGlobalError }: ScriptManagerProps) {
         screenplayText,
         createdBy: createdBy.trim() || null,
       }
-      const result = await createMovieScript(payload)
-      setScripts([result, ...scripts])
-      setScriptTitle("")
-      setPlotText("")
-      setScreenplayText("")
-      setCreatedBy("")
+      if (editingScriptId) {
+        const result = await updateMovieScript(editingScriptId, payload)
+        setScripts((prev) => prev.map((item) => (item.id === editingScriptId ? result : item)))
+      } else {
+        const result = await createMovieScript(payload)
+        setScripts((prev) => [result, ...prev])
+      }
+      resetForm()
     } catch (error) {
-      setGlobalError(error instanceof Error ? error.message : "上传剧本失败")
+      setGlobalError(error instanceof Error ? error.message : "保存剧本失败")
     } finally {
-      setUploading(false)
+      setSaving(false)
     }
   }
 
@@ -595,16 +611,28 @@ function ScriptManager({ movies, setGlobalError }: ScriptManagerProps) {
     setGlobalError(undefined)
     try {
       await deleteMovieScript(id)
-      setScripts(scripts.filter((item) => item.id !== id))
+      setScripts((prev) => prev.filter((item) => item.id !== id))
+      if (editingScriptId === id) {
+        resetForm()
+      }
     } catch (error) {
       setGlobalError(error instanceof Error ? error.message : "删除剧本失败")
     }
   }
 
+  const handleEdit = (item: MovieScript) => {
+    setGlobalError(undefined)
+    setEditingScriptId(item.id)
+    setScriptTitle(item.scriptTitle ?? "")
+    setPlotText(item.plotText ?? "")
+    setScreenplayText(item.screenplayText)
+    setCreatedBy(item.createdBy ?? "")
+  }
+
   return (
     <section className="space-y-8">
       <header>
-        <h2 className="flex items-center gap-2 text-2xl font-semibold text-amber-200">
+        <h2 className="flex items-center gap-2 text-2xl font-semibold text-sky-600 dark:text-amber-200">
           <FileText className="h-6 w-6" />
           剧情与剧本管理
         </h2>
@@ -718,12 +746,21 @@ function ScriptManager({ movies, setGlobalError }: ScriptManagerProps) {
 
             <button
               type="submit"
-              disabled={uploading || !selectedMovieId}
-              className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-amber-500/60"
+              disabled={saving || !selectedMovieId}
+              className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:bg-sky-300 disabled:text-white/70 dark:bg-amber-500 dark:text-slate-900 dark:hover:bg-amber-400 dark:disabled:bg-amber-500/60 dark:disabled:text-slate-900/60"
             >
-              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
-              上传剧本
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+              {editingScriptId ? "保存修改" : "上传剧本"}
             </button>
+            {editingScriptId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="text-sm text-slate-400 hover:text-slate-200"
+              >
+                取消编辑
+              </button>
+            )}
           </form>
         </div>
       </div>
@@ -746,13 +783,22 @@ function ScriptManager({ movies, setGlobalError }: ScriptManagerProps) {
                       <p className="text-base font-semibold text-slate-900 dark:text-slate-50">{item.scriptTitle || "未命名剧本"}</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400">上传人：{item.createdBy || "-"}</p>
                     </div>
-                    <button
-                      type="button"
-                      className="rounded-lg border border-red-500/40 px-3 py-1 text-xs text-red-300 hover:border-red-400 hover:text-red-200"
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      删除
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className="rounded-lg border border-slate-300 px-3 py-1 text-xs text-slate-900 transition hover:border-sky-400 hover:text-sky-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-amber-400 dark:hover:text-amber-200"
+                        onClick={() => handleEdit(item)}
+                      >
+                        编辑
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-lg border border-red-500/40 px-3 py-1 text-xs text-red-300 hover:border-red-400 hover:text-red-200"
+                        onClick={() => handleDelete(item.id)}
+                      >
+                        删除
+                      </button>
+                    </div>
                   </div>
                   <div className="mt-3 grid gap-2 text-xs text-slate-500 dark:text-slate-400 md:grid-cols-2">
                     <span>剧情字数：{item.plotText ? item.plotText.length : 0}</span>
@@ -794,12 +840,21 @@ function DialogueManager({ movies, setGlobalError }: DialogueManagerProps) {
   const [selectedMovieId, setSelectedMovieId] = useState<string>("")
   const [dialogues, setDialogues] = useState<MovieDialogueFile[]>([])
   const [loading, setLoading] = useState(false)
-  const [uploading, setUploading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [editingDialogueId, setEditingDialogueId] = useState<string | null>(null)
   const [fileName, setFileName] = useState("")
   const [dialogueText, setDialogueText] = useState("")
   const [createdBy, setCreatedBy] = useState("")
 
+  const resetForm = useCallback(() => {
+    setFileName("")
+    setDialogueText("")
+    setCreatedBy("")
+    setEditingDialogueId(null)
+  }, [])
+
   useEffect(() => {
+    resetForm()
     if (!selectedMovieId) {
       setDialogues([])
       return
@@ -817,7 +872,7 @@ function DialogueManager({ movies, setGlobalError }: DialogueManagerProps) {
       }
     }
     void load()
-  }, [selectedMovieId, setGlobalError])
+  }, [selectedMovieId, setGlobalError, resetForm])
 
   const handleFileChange = async (file: File) => {
     const text = await file.text()
@@ -836,7 +891,7 @@ function DialogueManager({ movies, setGlobalError }: DialogueManagerProps) {
       return
     }
 
-    setUploading(true)
+    setSaving(true)
     setGlobalError(undefined)
     try {
       const payload = {
@@ -846,15 +901,18 @@ function DialogueManager({ movies, setGlobalError }: DialogueManagerProps) {
         totalLines: splitLinesCount(dialogueText),
         createdBy: createdBy.trim() || null,
       }
-      const result = await createMovieDialogue(payload)
-      setDialogues([result, ...dialogues])
-      setFileName("")
-      setDialogueText("")
-      setCreatedBy("")
+      if (editingDialogueId) {
+        const result = await updateMovieDialogue(editingDialogueId, payload)
+        setDialogues((prev) => prev.map((item) => (item.id === editingDialogueId ? result : item)))
+      } else {
+        const result = await createMovieDialogue(payload)
+        setDialogues((prev) => [result, ...prev])
+      }
+      resetForm()
     } catch (error) {
-      setGlobalError(error instanceof Error ? error.message : "上传对白失败")
+      setGlobalError(error instanceof Error ? error.message : "保存对白失败")
     } finally {
-      setUploading(false)
+      setSaving(false)
     }
   }
 
@@ -865,16 +923,27 @@ function DialogueManager({ movies, setGlobalError }: DialogueManagerProps) {
     setGlobalError(undefined)
     try {
       await deleteMovieDialogue(id)
-      setDialogues(dialogues.filter((item) => item.id !== id))
+      setDialogues((prev) => prev.filter((item) => item.id !== id))
+      if (editingDialogueId === id) {
+        resetForm()
+      }
     } catch (error) {
       setGlobalError(error instanceof Error ? error.message : "删除对白失败")
     }
   }
 
+  const handleEdit = (item: MovieDialogueFile) => {
+    setGlobalError(undefined)
+    setEditingDialogueId(item.id)
+    setFileName(item.fileName ?? "")
+    setDialogueText(item.dialogueText)
+    setCreatedBy(item.createdBy ?? "")
+  }
+
   return (
     <section className="space-y-8">
       <header>
-        <h2 className="flex items-center gap-2 text-2xl font-semibold text-amber-200">
+        <h2 className="flex items-center gap-2 text-2xl font-semibold text-sky-600 dark:text-amber-200">
           <FileAudio className="h-6 w-6" />
           对白管理
         </h2>
@@ -962,12 +1031,21 @@ function DialogueManager({ movies, setGlobalError }: DialogueManagerProps) {
 
             <button
               type="submit"
-              disabled={uploading || !selectedMovieId}
-              className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-amber-500/60"
+              disabled={saving || !selectedMovieId}
+              className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:bg-sky-300 disabled:text-white/70 dark:bg-amber-500 dark:text-slate-900 dark:hover:bg-amber-400 dark:disabled:bg-amber-500/60 dark:disabled:text-slate-900/60"
             >
-              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileAudio className="h-4 w-4" />}
-              上传对白
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileAudio className="h-4 w-4" />}
+              {editingDialogueId ? "保存修改" : "上传对白"}
             </button>
+            {editingDialogueId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="text-sm text-slate-400 hover:text-slate-200"
+              >
+                取消编辑
+              </button>
+            )}
           </form>
         </div>
       </div>
@@ -990,13 +1068,22 @@ function DialogueManager({ movies, setGlobalError }: DialogueManagerProps) {
                       <p className="text-base font-semibold text-slate-900 dark:text-slate-50">{item.fileName || "未命名对白"}</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400">上传人：{item.createdBy || "-"}</p>
                     </div>
-                    <button
-                      type="button"
-                      className="rounded-lg border border-red-500/40 px-3 py-1 text-xs text-red-300 hover:border-red-400 hover:text-red-200"
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      删除
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className="rounded-lg border border-slate-300 px-3 py-1 text-xs text-slate-900 transition hover:border-sky-400 hover:text-sky-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-amber-400 dark:hover:text-amber-200"
+                        onClick={() => handleEdit(item)}
+                      >
+                        编辑
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-lg border border-red-500/40 px-3 py-1 text-xs text-red-300 hover:border-red-400 hover:text-red-200"
+                        onClick={() => handleDelete(item.id)}
+                      >
+                        删除
+                      </button>
+                    </div>
                   </div>
                   <div className="mt-3 grid gap-2 text-xs text-slate-500 dark:text-slate-400 md:grid-cols-2">
                     <span>对白字数：{item.dialogueText.length}</span>
@@ -1142,7 +1229,7 @@ function CharacterManager({ movies, setGlobalError }: CharacterManagerProps) {
   return (
     <section className="space-y-8">
       <header>
-        <h2 className="flex items-center gap-2 text-2xl font-semibold text-amber-200">
+        <h2 className="flex items-center gap-2 text-2xl font-semibold text-sky-600 dark:text-amber-200">
           <Users className="h-6 w-6" />
           角色管理
         </h2>
@@ -1259,11 +1346,11 @@ function CharacterManager({ movies, setGlobalError }: CharacterManagerProps) {
                 </div>
 
               <div className="flex items-center gap-3">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-amber-500/60"
-                >
+              <button
+                type="submit"
+                disabled={submitting}
+                className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:bg-sky-300 disabled:text-white/70 dark:bg-amber-500 dark:text-slate-900 dark:hover:bg-amber-400 dark:disabled:bg-amber-500/60 dark:disabled:text-slate-900/60"
+              >
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Users className="h-4 w-4" />}
                   {editingId ? "保存角色" : "创建角色"}
                 </button>
@@ -1312,7 +1399,7 @@ function CharacterManager({ movies, setGlobalError }: CharacterManagerProps) {
                       <div className="flex gap-2">
                         <button
                           type="button"
-                          className="rounded-lg border border-slate-300 px-3 py-1 text-xs text-slate-700 transition hover:border-amber-400 hover:text-amber-500 dark:border-slate-700 dark:text-slate-200"
+                        className="rounded-lg border border-slate-300 px-3 py-1 text-xs text-slate-900 transition hover:border-sky-400 hover:text-sky-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-amber-400 dark:hover:text-amber-200"
                           onClick={() => {
                             setEditingId(character.id)
                             setFormState({

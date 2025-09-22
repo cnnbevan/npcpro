@@ -1,5 +1,4 @@
 import { FormEvent, useMemo, useState } from "react"
-import { Link } from "react-router-dom"
 import {
   BookOpen,
   Loader2,
@@ -78,12 +77,14 @@ export default function Home() {
             </h1>
           </div>
           <div className="flex items-center gap-3 self-start">
-            <Link
-              to="/admin"
+            <a
+              href="/admin"
+              target="_blank"
+              rel="noopener noreferrer"
               className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               影片管理
-            </Link>
+            </a>
             <button
               type="button"
               onClick={toggleTheme}
